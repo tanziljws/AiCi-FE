@@ -6,7 +6,7 @@ import { formatCurrency } from '@/lib/utils/format';
 import {
     TrendingUp, BookOpen, CreditCard, Award, Target,
     BarChart3, CheckCircle2, Clock, Star, Loader2,
-    ChevronUp, ChevronDown, Minus
+    ChevronUp, ChevronDown, Minus, GraduationCap
 } from 'lucide-react';
 
 // ── Tiny bar chart rendered with plain divs (no extra deps) ──────────────
@@ -72,7 +72,7 @@ function ScoreTimeline({ data }: { data: { date: string; score: number; test_tit
                                 {/* Tooltip */}
                                 <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-[#0d2a38] text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
                                     <p className="font-bold">{d.score}%</p>
-                                    <p className="text-white/70 truncate max-w-[140px]">{d.test_title}</p>
+                                    <p className="text-white/70 truncate max-w-35">{d.test_title}</p>
                                     <p className="text-white/50">{d.date}</p>
                                 </div>
                                 <div
@@ -174,7 +174,7 @@ export default function UserAnalyticsPage() {
         );
     }
 
-    const { enrollment_stats, recent_enrollments, payment_stats, test_stats, score_timeline, current_level, classes_by_level, best_result } = analytics;
+    const { enrollment_stats, recent_enrollments, payment_stats, test_stats, score_timeline, current_level, classes_by_level, best_result, certificates_count } = analytics;
     const levelConf = current_level ? (LEVEL_CONFIG[current_level] || { emoji: '🎓', color: 'text-[#255d74]', bg: 'bg-[#255d74]/10' }) : null;
 
     const completionRate = test_stats.completed_attempts > 0
@@ -204,7 +204,7 @@ export default function UserAnalyticsPage() {
             </div>
 
             {/* Stat cards row */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                 <StatCard
                     label="Total Pendaftaran"
                     value={enrollment_stats.total}
@@ -213,25 +213,32 @@ export default function UserAnalyticsPage() {
                     sub={`${enrollment_stats.confirmed} dikonfirmasi`}
                 />
                 <StatCard
-                    label="Total Dibayar"
-                    value={formatCurrency(payment_stats.total_paid)}
-                    icon={CreditCard}
-                    color="bg-green-100 text-green-600"
-                    sub={`${payment_stats.paid_count} pembayaran sukses`}
+                    label="Kelas Selesai"
+                    value={enrollment_stats.completed}
+                    icon={GraduationCap}
+                    color="bg-indigo-100 text-indigo-600"
+                    sub={`dari ${enrollment_stats.total} pendaftaran`}
+                />
+                <StatCard
+                    label="Sertifikat"
+                    value={certificates_count || 0}
+                    icon={Award}
+                    color="bg-yellow-100 text-yellow-600"
+                    sub="sertifikat diperoleh"
                 />
                 <StatCard
                     label="Rata-rata Skor"
                     value={`${test_stats.average_score}%`}
                     icon={BarChart3}
                     color="bg-purple-100 text-purple-600"
-                    sub={`dari ${test_stats.completed_attempts} tes selesai`}
+                    sub={`dari ${test_stats.completed_attempts} tes`}
                 />
                 <StatCard
                     label="Tingkat Kelulusan"
                     value={`${completionRate}%`}
-                    icon={Award}
-                    color="bg-orange-100 text-orange-600"
-                    sub={`${test_stats.passed_count} dari ${test_stats.completed_attempts} tes`}
+                    icon={CheckCircle2}
+                    color="bg-green-100 text-green-600"
+                    sub={`${test_stats.passed_count}/${test_stats.completed_attempts} lulus`}
                 />
             </div>
 

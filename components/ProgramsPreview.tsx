@@ -27,7 +27,7 @@ const ProgramsPreview = () => {
             try {
                 const res = await api.content.programs();
                 // Take only first 5 programs to fit the layout (6th slot is button)
-                setPrograms(res.data.slice(0, 5));
+                setPrograms((res.results || []).slice(0, 5));
             } catch (err) {
                 console.error("Failed to fetch programs", err);
             } finally {
@@ -115,7 +115,7 @@ const ProgramsPreview = () => {
                                     </div>
                                     
                                     <h3 className="text-lg font-semibold mb-4 min-h-10 leading-tight">
-                                        {program.title}
+                                        {program.name}
                                     </h3>
                                     <p className="text-white/80 text-[13px] leading-relaxed line-clamp-6">
                                         {program.description}

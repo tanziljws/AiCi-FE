@@ -53,20 +53,28 @@ export interface BackendArticle {
     id: string;
     title: string;
     slug: string;
-    excerpt: string;
+    excerpt: string | null;
     content?: string;
-    thumbnail: string;
-    author: string;
+    featured_image: string | null;
+    category: string | null;
+    tags: string[] | string | null;
+    status: 'draft' | 'published' | 'archived';
     published_at: string | null;
     created_at: string;
+    updated_at: string;
 }
 
 export interface BackendProgram {
     id: string;
-    title: string;
-    description: string;
-    image: string;
-    order: number;
+    name: string;
+    slug: string;
+    description: string | null;
+    brochure_url: string | null;
+    images: string[] | null;
+    sort_order: number;
+    is_active: boolean;
+    created_at: string | null;
+    updated_at: string | null;
 }
 
 export interface BackendSiteSettings {
@@ -490,7 +498,7 @@ export const api = {
         deleteGalleryImage: (id: string) => fetcher<any>(`/v1/admin/gallery/${id}`, { method: 'DELETE' }),
 
         // Articles
-        articles: (params?: string) => fetcher<{ success: boolean; message: string; results: BackendArticle[] }>(`/v1/admin/articles${params ? `?${params}` : ''}`),
+        articles: (params?: string) => fetcher<{ success: boolean; results: BackendArticle[] }>(`/v1/admin/articles${params ? `?${params}` : ''}`),
         articleBySlug: (slug: string) => fetcher<{ success: boolean; message: string; data: BackendArticle }>(`/v1/articles/${slug}`),
         createArticle: (data: FormData) => fetcher<any>('/v1/admin/articles', { method: 'POST', body: data }),
         updateArticle: (slug: string, data: FormData) => fetcher<any>(`/v1/admin/articles/${slug}`, { method: 'PATCH', body: data }),
@@ -506,7 +514,7 @@ export const api = {
         deleteFacility: (id: string) => fetcher<any>(`/v1/admin/facilities/${id}`, { method: 'DELETE' }),
 
         // Programs
-        programs: () => fetcher<{ success: boolean; message: string; data: BackendProgram[] }>('/v1/programs'),
+        programs: () => fetcher<{ success: boolean; results: BackendProgram[] }>('/v1/admin/programs'),
         createProgram: (data: FormData) => fetcher<any>('/v1/admin/programs', { method: 'POST', body: data }),
         updateProgram: (id: string, data: FormData) => fetcher<any>(`/v1/admin/programs/${id}`, { method: 'PATCH', body: data }),
         deleteProgram: (id: string) => fetcher<any>(`/v1/admin/programs/${id}`, { method: 'DELETE' }),

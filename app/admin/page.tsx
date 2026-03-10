@@ -45,14 +45,16 @@ export default function AdminDashboard() {
                 setRecentArticles(articles.slice(0, 5));
                 
                 setStats({
-                    totalPrograms: programsData.count,
-                    totalTestimonials: testimonialsData.count,
-                    totalPartners: partnersData.count,
-                    totalFacilities: facilitiesData.count,
-                    totalTeam: teamData.count,
-                    totalGallery: galleryData.count,
-                    totalArticles: articlesData.count,
-                    totalPages: (pagesData.results || pagesData).length,
+                    totalPrograms: programsData?.data?.length ?? 0,
+                    totalTestimonials: testimonialsData?.data?.length ?? 0,
+                    totalPartners: partnersData?.data?.length ?? 0,
+                    totalFacilities: facilitiesData?.data?.length ?? 0,
+                    totalTeam: teamData?.data?.length ?? 0,
+                    totalGallery: galleryData?.data?.length ?? 0,
+                    totalArticles: articlesData?.results?.length ?? 0,
+                    totalPages: Array.isArray(pagesData?.results ?? pagesData)
+                        ? (pagesData?.results ?? pagesData).length
+                        : 0,
                 });
             } catch (err) {
                 console.error("Failed to load dashboard data:", err);

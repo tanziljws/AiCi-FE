@@ -18,7 +18,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }
 
         const token = localStorage.getItem("aici_token");
-        if (!token) {
+        const isValidToken = token && token !== "undefined" && token !== "null";
+
+        if (!isValidToken) {
+            localStorage.removeItem("aici_token");
+            localStorage.removeItem("aici_refresh");
             router.push("/admin/login");
         } else {
             setIsChecking(false);

@@ -19,9 +19,20 @@ export default function AdminLoginPage() {
         setIsLoading(true);
 
         try {
-            const data = await api.auth.login({ username, password });
-            localStorage.setItem("aici_token", data.access);
-            localStorage.setItem("aici_refresh", data.refresh);
+            const response = await api.auth.login({ email: username, password });
+            const authData = response?.data || {};
+            const token = authData.access || authData.access_token || authData.token;
+
+            if (!token) {
+                throw new Error("Login gagal: token tidak ditemukan.");
+            }
+
+            localStorage.setItem("aici_token", token);
+            if (authData.refresh) {
+                localStorage.setItem("aici_refresh", authData.refresh);
+            } else {
+                localStorage.removeItem("aici_refresh");
+            }
             router.push("/admin");
         } catch (err: any) {
             setError(err.message || "Invalid credentials. Please try again.");

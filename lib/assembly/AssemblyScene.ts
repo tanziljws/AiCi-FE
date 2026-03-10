@@ -254,8 +254,6 @@ export class AssemblyScene {
 
         const fillLight = new THREE.HemisphereLight("#93c5fd", "#0f172a", 0.24);
         this.scene.add(fillLight);
-
-        this.scene.add(this.createAxesIndicator());
     }
 
     private setupControls(): void {

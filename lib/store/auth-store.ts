@@ -11,9 +11,11 @@ interface AuthState {
     user: User | null;
     token: string | null;
     isAuthenticated: boolean;
+    isHydrated: boolean;
     setAuth: (user: User, token: string) => void;
     clearAuth: () => void;
     updateUser: (user: Partial<User>) => void;
+    setHydrated: (value: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -22,6 +24,7 @@ export const useAuthStore = create<AuthState>()(
             user: null,
             token: null,
             isAuthenticated: false,
+            isHydrated: false,
 
             setAuth: (user, token) => {
                 // Store token in localStorage for API calls
@@ -44,6 +47,8 @@ export const useAuthStore = create<AuthState>()(
                 set((state) => ({
                     user: state.user ? { ...state.user, ...userData } : null,
                 })),
+
+            setHydrated: (value) => set({ isHydrated: value }),
         }),
         {
             name: 'aici-auth-storage',
@@ -52,6 +57,9 @@ export const useAuthStore = create<AuthState>()(
                 token: state.token,
                 isAuthenticated: state.isAuthenticated,
             }),
+            onRehydrateStorage: () => (state) => {
+                state?.setHydrated(true);
+            },
         }
     )
 );

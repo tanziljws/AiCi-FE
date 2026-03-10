@@ -52,6 +52,7 @@ export type RadarStepEnterPreviewRule = {
     name: string;
     transform: "start" | "final";
   }>;
+  highlightParts?: string[];
 };
 
 export type RadarStepNavigationRule = {

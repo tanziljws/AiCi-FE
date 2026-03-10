@@ -487,6 +487,12 @@ export default function Learning3DPage() {
             : partTransform.finalRotation,
       });
     });
+
+    if (previewRule.highlightParts?.length) {
+      previewRule.highlightParts.forEach((partName) => {
+        void sceneRef.current?.getStepManager().pulsePart(partName);
+      });
+    }
   }, [
     currentStepRuntimeBehavior.enterPreview,
     mode,

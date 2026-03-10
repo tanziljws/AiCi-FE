@@ -112,6 +112,12 @@ export const RADAR_LEARNING_STEP_SPECS: RadarLearningStepSpec[] = [
     partId: "p70",
     quantity: 1,
     partIndexes: [1],
+    partOverrides: {
+      1: {
+        startOffset: { x: 0, y: 0, z: 0 },
+        disableHighlight: true,
+      },
+    },
     instruction:
       "Mulai dengan menempatkan frame P70 pertama sebagai dasar assembly radar.",
   },
@@ -119,6 +125,10 @@ export const RADAR_LEARNING_STEP_SPECS: RadarLearningStepSpec[] = [
     partId: "fixed",
     quantity: 2,
     partIndexes: [2, 3],
+    partOverrides: {
+      2: { disableHighlight: true },
+      3: { disableHighlight: true },
+    },
     instruction:
       "Pasang dua fixed connector sisi kiri pada frame pertama sekaligus.",
   },
@@ -752,11 +762,33 @@ export const RADAR_LEARNING_STEP_SPECS: RadarLearningStepSpec[] = [
 
 const RADAR_STEP_ENTER_PREVIEW_RULES = new Map<number, RadarStepEnterPreviewRule>([
   [
+    1,
+    {
+      parts: [{ name: formatRadarPhysicalPartName(1), transform: "final" }],
+      highlightParts: [formatRadarPhysicalPartName(1)],
+    },
+  ],
+  [
     27,
     {
       parts: [
         { name: RADAR_BASE_STAND_PART_NAME, transform: "final" },
         { name: RADAR_HEAD_CONTROL_PART_NAME, transform: "start" },
+      ],
+    },
+  ],
+  [
+    2,
+    {
+      parts: [{ name: formatRadarPhysicalPartName(1), transform: "final" }],
+    },
+  ],
+  [
+    37,
+    {
+      parts: [
+        { name: formatRadarPhysicalPartName(64), transform: "start" },
+        { name: formatRadarPhysicalPartName(65), transform: "start" },
       ],
     },
   ],
@@ -776,12 +808,19 @@ const RADAR_STEP_ENTER_PREVIEW_RULES = new Map<number, RadarStepEnterPreviewRule
       ],
     },
   ],
+  [
+    49,
+    {
+      parts: [
+        { name: formatRadarPhysicalPartName(28), transform: "start" },
+        { name: formatRadarPhysicalPartName(38), transform: "start" },
+      ],
+    },
+  ],
 ]);
 
 const RADAR_STEP_NAVIGATION_RULES = new Map<number, RadarStepNavigationRule>([
   [29, { cameraPresetStepOnNext: 30 }],
-  [37, { skipForwardSteps: 1 }],
-  [39, { skipBackwardSteps: 1 }],
   [
     45,
     {

@@ -95,7 +95,7 @@ export interface PaginatedResponse<T> {
     results: T[];
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 const PUBLIC_ENDPOINTS = [
     '/v1/content/testimonials',
@@ -116,6 +116,23 @@ function isPublicEndpoint(endpoint: string): boolean {
     return PUBLIC_ENDPOINTS.some(p => endpoint.startsWith(p));
 }
 
+function getLoginRedirectPath(): string {
+    if (typeof window === 'undefined') {
+        return '/login';
+    }
+    return window.location.pathname.startsWith('/admin') ? '/admin/login' : '/login';
+}
+
+function redirectToLogin(endpoint: string) {
+    if (typeof window === 'undefined' || endpoint.includes('/auth/login')) {
+        return;
+    }
+    const target = getLoginRedirectPath();
+    if (window.location.pathname !== target) {
+        window.location.href = target;
+    }
+}
+
 let isRefreshing = false;
 let refreshSubscribers: ((token: string) => void)[] = [];
 
@@ -132,7 +149,11 @@ export async function fetcher<T>(endpoint: string, options?: RequestInit): Promi
     const isPublic = isPublicEndpoint(endpoint);
     
     const getHeaders = (withAuth = true) => {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('aici_token') : null;
+        const storedToken = typeof window !== 'undefined' ? localStorage.getItem('aici_token') : null;
+        const token =
+            storedToken && storedToken !== 'undefined' && storedToken !== 'null'
+                ? storedToken
+                : null;
         const headers: HeadersInit = {
             ...options?.headers,
         };
@@ -170,9 +191,19 @@ export async function fetcher<T>(endpoint: string, options?: RequestInit): Promi
 
                 if (refreshRes.ok) {
                     const data = await refreshRes.json();
-                    localStorage.setItem('aici_token', data.access);
+                    const refreshedToken =
+                        data?.access ||
+                        data?.access_token ||
+                        data?.data?.access ||
+                        data?.data?.access_token;
+
+                    if (!refreshedToken) {
+                        throw new Error('Refresh token invalid');
+                    }
+
+                    localStorage.setItem('aici_token', refreshedToken);
                     isRefreshing = false;
-                    onTokenRefreshed(data.access);
+                    onTokenRefreshed(refreshedToken);
                     res = await attemptFetch();
                 } else {
                     throw new Error("Refresh failed");
@@ -181,10 +212,7 @@ export async function fetcher<T>(endpoint: string, options?: RequestInit): Promi
                 isRefreshing = false;
                 localStorage.removeItem('aici_token');
                 localStorage.removeItem('aici_refresh');
-                
-                if (typeof window !== 'undefined' && !endpoint.includes('/auth/login')) {
-                    window.location.href = '/admin/login';
-                }
+                redirectToLogin(endpoint);
             }
         } else if (isRefreshing) {
             // Wait for existing refresh
@@ -193,8 +221,12 @@ export async function fetcher<T>(endpoint: string, options?: RequestInit): Promi
                     resolve(await (await attemptFetch()).json());
                 });
             }) as any;
-        } else if (typeof window !== 'undefined' && !endpoint.includes('/auth/login')) {
-            window.location.href = '/admin/login';
+        } else {
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('aici_token');
+                localStorage.removeItem('aici_refresh');
+            }
+            redirectToLogin(endpoint);
         }
     }
 
@@ -272,7 +304,7 @@ export const authApi = {
         method: 'POST',
         body: JSON.stringify(data),
     }),
-    login: (credentials: any) => fetcher<{ data: { user: any; token: string } }>('/v1/auth/login', {
+    login: (credentials: any) => fetcher<{ data: { user: any; token?: string; access?: string; access_token?: string; refresh?: string } }>('/v1/auth/login', {
         method: 'POST',
         body: JSON.stringify(credentials),
     }),
@@ -459,7 +491,7 @@ export const api = {
             fetcher<any>('/v1/content/contact', { method: 'POST', body: JSON.stringify(data) }),
     },
     auth: {
-        login: (credentials: any) => fetcher<{ access: string; refresh: string }>('/v1/auth/login', {
+        login: (credentials: any) => fetcher<{ success?: boolean; message?: string; data: { user?: any; token?: string; access?: string; access_token?: string; refresh?: string } }>('/v1/auth/login', {
             method: 'POST',
             body: JSON.stringify(credentials),
         }),

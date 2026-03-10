@@ -198,6 +198,12 @@ export class StepManager {
         };
     }
 
+    async pulsePart(partName: string): Promise<void> {
+        const part = this.partMap.get(partName);
+        if (!part) return;
+        await this.highlighter.pulse(part);
+    }
+
     async nextStep(): Promise<StepStateSnapshot> {
         if (!this.canGoNext()) return this.getState();
 

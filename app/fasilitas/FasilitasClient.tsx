@@ -27,11 +27,15 @@ const categoryTabs = [
     { key: "ROBOT", label: "ROBOT" },
 ];
 
-export default function FasilitasPage() {
-    const [facilities, setFacilities] = useState<BackendFacility[]>([]);
-    const [loading, setLoading] = useState(true);
+export default function FasilitasPage({ initialFacilities }: { initialFacilities?: BackendFacility[] }) {
+    const [facilities, setFacilities] = useState<BackendFacility[]>(initialFacilities ?? []);
+    const [loading, setLoading] = useState(!initialFacilities);
 
     useEffect(() => {
+        // Skip the fetch if initial data was provided by the Server Component (ISR)
+        if (initialFacilities && initialFacilities.length > 0) {
+            return;
+        }
         const fetchFacilities = async () => {
             try {
                 const res = await api.facilities.list();
@@ -43,6 +47,7 @@ export default function FasilitasPage() {
             }
         };
         fetchFacilities();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Sort/Group facilities if needed, or just display as list sorted by order (default from backend)

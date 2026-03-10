@@ -9,16 +9,19 @@ import { Phone, MessageCircle, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api, BackendProgram } from "@/lib/api";
 
-export default function ProgramPage() {
-    const [programs, setPrograms] = useState<BackendProgram[]>([]);
-    const [loading, setLoading] = useState(true);
+export default function ProgramPage({ initialPrograms }: { initialPrograms?: BackendProgram[] }) {
+    const [programs, setPrograms] = useState<BackendProgram[]>(initialPrograms ?? []);
+    const [loading, setLoading] = useState(!initialPrograms);
     const [error, setError] = useState("");
 
     useEffect(() => {
+        if (initialPrograms && initialPrograms.length > 0) {
+            return;
+        }
         const fetchPrograms = async () => {
             try {
                 const res = await api.content.programs();
-                setPrograms(res.data);
+                setPrograms(res.results);
             } catch (err) {
                 console.error("Failed to fetch programs", err);
                 setError("Failed to load programs.");
@@ -27,6 +30,7 @@ export default function ProgramPage() {
             }
         };
         fetchPrograms();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -78,7 +82,7 @@ export default function ProgramPage() {
                                 <div className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12 lg:gap-20`}>
                                     {/* Image Skeleton */}
                                     <div className="w-full lg:w-1/2 relative group">
-                                        <div className="relative aspect-video rounded-[2rem] overflow-hidden shadow-xl bg-gradient-to-br from-gray-200 to-gray-300 animate-pulse">
+                                        <div className="relative aspect-video rounded-[2rem] overflow-hidden shadow-xl bg-linear-to-br from-gray-200 to-gray-300 animate-pulse">
                                             <div className="w-full h-full" />
                                         </div>
                                     </div>
@@ -125,11 +129,11 @@ export default function ProgramPage() {
                                 <div className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12 lg:gap-20`}>
                                     {/* Image Container */}
                                     <div className="w-full lg:w-1/2 relative group">
-                                        <div className="relative aspect-video rounded-[2rem] overflow-hidden shadow-xl bg-gradient-to-br from-gray-200 to-gray-300">
-                                            {program.image ? (
+                                        <div className="relative aspect-video rounded-[2rem] overflow-hidden shadow-xl bg-linear-to-br from-gray-200 to-gray-300">
+                                            {program.images && program.images.length > 0 ? (
                                                 <Image
-                                                    src={program.image}
-                                                    alt={program.title || 'Program Image'}
+                                                    src={program.images[0]}
+                                                    alt={program.name}
                                                     fill
                                                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                                                     sizes="(max-width: 768px) 100vw, 50vw"
@@ -151,10 +155,10 @@ export default function ProgramPage() {
                                     {/* Text Content */}
                                     <div className="w-full lg:w-1/2">
                                         <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-[#0B6282] mb-6 leading-tight">
-                                            {program.title}
+                                            {program.name}
                                         </h2>
                                         <div className="text-gray-600 text-sm md:text-base leading-relaxed space-y-4 mb-10 text-justify">
-                                            {program.description.split('\r\n').map((para, i) => (
+                                            {(program.description ?? '').split('\r\n').map((para, i) => (
                                                 <p key={i}>{para}</p>
                                             ))}
                                         </div>

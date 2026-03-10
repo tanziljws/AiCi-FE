@@ -116,7 +116,7 @@ export default function AdminProgramsPage() {
         setIsLoading(true);
         try {
             const data = await api.content.programs();
-            setPrograms(data.results);
+            setPrograms(data.data ?? []);
         } catch (err) {
             console.error("Failed to load programs:", err);
             toast.error("Failed to load programs");
@@ -143,7 +143,7 @@ export default function AdminProgramsPage() {
             try {
                 await api.content.reorderPrograms(newOrder.map(p => p.id));
                 toast.success("Order updated");
-            } catch (err) {
+            } catch {
                 toast.error("Failed to update order");
                 loadPrograms(); // Revert on error
             }
@@ -208,8 +208,9 @@ export default function AdminProgramsPage() {
             setIsModalOpen(false);
             resetForm();
             loadPrograms();
-        } catch (err: any) {
-            toast.error(err.message || "Failed to save program");
+        } catch (err) {
+            const message = err instanceof Error ? err.message : "Failed to save program";
+            toast.error(message);
         } finally {
             setIsSaving(false);
         }

@@ -41,6 +41,7 @@ export type RadarLearningStepSpec = {
         targetOffset?: StepOffset;
         targetPosition?: [number, number, number];
         targetRotation?: [number, number, number];
+        disableHighlight?: boolean;
       }
     >
   >;

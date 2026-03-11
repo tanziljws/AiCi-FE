@@ -105,7 +105,7 @@ export interface PaginatedResponse<T> {
     results: T[];
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 const PUBLIC_ENDPOINTS = [
     '/v1/content/testimonials',
@@ -124,6 +124,23 @@ const PUBLIC_ENDPOINTS = [
 
 function isPublicEndpoint(endpoint: string): boolean {
     return PUBLIC_ENDPOINTS.some(p => endpoint.startsWith(p));
+}
+
+function getLoginRedirectPath(): string {
+    if (typeof window === 'undefined') {
+        return '/login';
+    }
+    return window.location.pathname.startsWith('/admin') ? '/admin/login' : '/login';
+}
+
+function redirectToLogin(endpoint: string) {
+    if (typeof window === 'undefined' || endpoint.includes('/auth/login')) {
+        return;
+    }
+    const target = getLoginRedirectPath();
+    if (window.location.pathname !== target) {
+        window.location.href = target;
+    }
 }
 
 let isRefreshing = false;
@@ -146,7 +163,11 @@ export async function fetcher<T>(endpoint: string, options?: RequestInit): Promi
     const shouldDedupe = method === 'GET' && !options?.body;
     
     const getHeaders = (withAuth = true) => {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('aici_token') : null;
+        const storedToken = typeof window !== 'undefined' ? localStorage.getItem('aici_token') : null;
+        const token =
+            storedToken && storedToken !== 'undefined' && storedToken !== 'null'
+                ? storedToken
+                : null;
         const headers: HeadersInit = {
             ...options?.headers,
         };
@@ -525,7 +546,7 @@ export const api = {
             fetcher<any>('/v1/content/contact', { method: 'POST', body: JSON.stringify(data) }),
     },
     auth: {
-        login: (credentials: any) => fetcher<{ access: string; refresh: string }>('/v1/auth/login', {
+        login: (credentials: any) => fetcher<{ success?: boolean; message?: string; data: { user?: any; token?: string; access?: string; access_token?: string; refresh?: string } }>('/v1/auth/login', {
             method: 'POST',
             body: JSON.stringify(credentials),
         }),

@@ -5,12 +5,13 @@
  * User authentication page
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/lib/hooks/use-auth';
+import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, LogIn, Loader2 } from 'lucide-react';
 
 const loginSchema = z.object({
@@ -22,8 +23,13 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
+    const router = useRouter();
     const { login, isLoading } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
+
+    useEffect(() => {
+        router.prefetch('/dashboard');
+    }, [router]);
 
     const {
         register,

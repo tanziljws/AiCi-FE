@@ -145,7 +145,7 @@ export default function AdminPartnersPage() {
         setIsLoading(true);
         try {
             const data = await api.content.partners();
-            setPartners(data.results);
+            setPartners(data);
         } catch (err) {
             console.error("Failed to load partners:", err);
             toast.error("Failed to load partners");

@@ -135,7 +135,7 @@ export default function AdminFacilitiesPage() {
         setIsLoading(true);
         try {
             const data = await api.content.facilities();
-            setFacilities(data.results);
+            setFacilities(data);
         } catch (err) {
             console.error("Failed to load facilities:", err);
             toast.error("Failed to load facilities");

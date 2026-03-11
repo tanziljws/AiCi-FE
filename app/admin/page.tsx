@@ -40,19 +40,27 @@ export default function AdminDashboard() {
                     api.content.pageContent()
                 ]);
 
-                // Get recent articles
-                const articles = articlesData.results || [];
+                // Get recent articles (api.content.articles still returns { results })
+                const articlesRaw: any = articlesData;
+                const articles: BackendArticle[] = Array.isArray(articlesRaw)
+                    ? articlesRaw
+                    : Array.isArray(articlesRaw?.results)
+                    ? articlesRaw.results
+                    : [];
                 setRecentArticles(articles.slice(0, 5));
-                
+
+                // testimonials/partners/team/facilities now return plain arrays directly
+                const toLen = (v: any) => Array.isArray(v) ? v.length : (v?.results?.length ?? v?.data?.length ?? 0);
+
                 setStats({
-                    totalPrograms: programsData.data.length,
-                    totalTestimonials: testimonialsData.results.length,
-                    totalPartners: partnersData.results.length,
-                    totalFacilities: facilitiesData.results.length,
-                    totalTeam: teamData.results.length,
-                    totalGallery: galleryData.results.length,
+                    totalPrograms: (programsData.data || []).length,
+                    totalTestimonials: toLen(testimonialsData),
+                    totalPartners: toLen(partnersData),
+                    totalFacilities: toLen(facilitiesData),
+                    totalTeam: toLen(teamData),
+                    totalGallery: toLen(galleryData),
                     totalArticles: articles.length,
-                    totalPages: (pagesData.data || []).length,
+                    totalPages: (pagesData?.data || []).length,
                 });
             } catch (err) {
                 console.error("Failed to load dashboard data:", err);
